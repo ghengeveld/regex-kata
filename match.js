@@ -1,8 +1,3 @@
-const lower = 'abcdefghijklmnopqrstuvwxyz'
-const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-const nums = '0123456789'
-const chars = '!@#$%^&*()_+~`[]{};\':"\\|,./<>?'
-
 export default function match(regex, value) {
   const tokens = tokenize(regex)
   return loop(tokens, value) || null
@@ -28,7 +23,7 @@ function loop(tokens, value) {
 
 export function tokenize(regex, groups = []) {
   const [head, ...tail] = regex
-  if (head === '.' || isAlpha(head) || isNum(head)) {
+  if (head === '.') {
     return tokenize(tail, [...groups, head])
   }
   if (head === '^') {
@@ -42,6 +37,9 @@ export function tokenize(regex, groups = []) {
   if (head === '*') {
     const prev = groups.pop()
     return tokenize(tail, [...groups, prev + head])
+  }
+  if (head) {
+    return tokenize(tail, [...groups, head])
   }
   return groups
 }
@@ -101,24 +99,4 @@ function matchTokenRight(token, value, offset) {
     return { match: str.charAt(str.length - 1), offset: 0 }
 
   return {}
-}
-
-function isAlpha(char) {
-  return isLower(char) || isUpper(char)
-}
-
-function isLower(char) {
-  return char && char.length === 1 && lower.indexOf(char) >= 0
-}
-
-function isUpper(char) {
-  return char && char.length === 1 && upper.indexOf(char) >= 0
-}
-
-function isNum(char) {
-  return char && char.length === 1 && nums.indexOf(char) >= 0
-}
-
-function isChar(char) {
-  return char && char.length === 1 && chars.indexOf(char) >= 0
 }
