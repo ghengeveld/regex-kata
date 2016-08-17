@@ -1,13 +1,9 @@
-import chai, { expect, should } from 'chai';
-should();
 import 'babel-polyfill';
-import match from './match';
-
+import chai, { expect } from 'chai';
+import match, { tokenize, matchToken } from './match';
 
 describe('regex code kata', () => {
-
   describe('dot matches a char', () => {
-
     it('matches chars', () => {
       expect(match('.', 'a')).to.equal('a');
       expect(match('.', '.')).to.equal('.');
@@ -25,10 +21,12 @@ describe('regex code kata', () => {
       expect(match('.', '\r')).to.equal(null);
     });
 
+    it('matches halfway', () => {
+      expect(match('abc', 'ababcab')).to.equal('abc');
+    });
   });
 
   describe('beginning of input ^', () => {
-
     it('matches', () => {
       expect(match('^a', 'a')).to.equal('a');
       expect(match('^A', 'An A')).to.equal('A');
@@ -37,12 +35,10 @@ describe('regex code kata', () => {
     it('does not match', () => {
       expect(match('^A', 'an A')).to.equal(null);
     });
-
   });
 
 
   describe('end of input $', () => {
-
     it('matches', () => {
       expect(match('a$', 'a')).to.equal('a');
       expect(match('t$', 'eat')).to.equal('t');
@@ -51,10 +47,13 @@ describe('regex code kata', () => {
     it('does not match', () => {
       expect(match('t$', 'eater')).to.equal(null);
     });
-
   });
 
   describe('star operator *', () => {
+    it('matches', () => {
+      expect(match('a*', 'a')).to.equal('a');
+    });
+
     it('is greedy', () => {
       expect(match('a*', 'aaaa')).to.equal('aaaa');
     });
@@ -67,5 +66,25 @@ describe('regex code kata', () => {
       expect(match('bo*', 'A goat grunter')).to.equal(null);
     });
   });
+});
 
+describe('tokenize', () => {
+  it('should split a regex into groups', () => {
+    expect(tokenize('.')).to.deep.equal(['.'])
+    expect(tokenize('a')).to.deep.equal(['a'])
+    expect(tokenize('Aa')).to.deep.equal(['A', 'a'])
+    expect(tokenize('^aA')).to.deep.equal(['^a', 'A'])
+    expect(tokenize('aa$')).to.deep.equal(['a', 'a$'])
+    expect(tokenize('aa*')).to.deep.equal(['a', 'a*'])
+  });
+});
+
+describe('matchToken', () => {
+  it('should find the first match for a token starting from an offset', () => {
+    expect(matchToken('a', 'aa').match).to.equal('a')
+    expect(matchToken('.', 'ab').match).to.equal('a')
+    expect(matchToken('.', 'ab', 1).match).to.equal('b')
+    expect(matchToken('b', 'aa').match).to.equal(undefined)
+    expect(matchToken('b', 'ab', 0, true)).to.deep.equal({ match: 'b', offset: 1 })
+  });
 });
